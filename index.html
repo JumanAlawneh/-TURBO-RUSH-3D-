@@ -4,354 +4,308 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Who Stole My Memory?</title>
-
+<title>Turbo Rush 3D</title>
 <style>
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    min-height: 100vh;
-    font-family: Arial, sans-serif;
-    color: #f5efff;
-    background:
-        radial-gradient(ellipse at top, #38205e 0%, #100d20 55%, #070710 100%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 24px;
-}
-
-.game {
-    width: 100%;
-    max-width: 700px;
-    padding: 40px 28px;
-    text-align: center;
-    border: 1px solid #7852a8;
-    border-radius: 24px;
-    background: rgba(17, 13, 34, 0.88);
-    box-shadow: 0 0 55px #8b45c544;
-}
-
-.symbol {
-    font-size: 64px;
-    margin-bottom: 18px;
-    animation: float 3s ease-in-out infinite;
-}
-
-h1 {
-    font-size: clamp(30px, 6vw, 48px);
-    color: #e1c4ff;
-    margin-bottom: 14px;
-}
-
-.subtitle {
-    color: #bba8d5;
-    line-height: 1.8;
-    margin-bottom: 28px;
-}
-
-.story {
-    font-size: 17px;
-    line-height: 2;
-    margin: 25px 0;
-    white-space: pre-line;
-}
-
-button {
-    width: 100%;
-    padding: 15px;
-    margin-top: 12px;
-    border: 1px solid #a77be0;
-    border-radius: 12px;
-    background: #382052;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-    transition: 0.25s;
-}
-
-button:hover {
-    background: #7043a1;
-    transform: translateY(-2px);
-}
-
-.primary {
-    background: linear-gradient(120deg, #8150b8, #512d80);
-}
-
-.hidden {
-    display: none;
-}
-
-.memory {
-    margin-top: 24px;
-    color: #d6baff;
-    font-size: 14px;
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-}
+*{box-sizing:border-box}
+body{margin:0;overflow:hidden;background:#87ceeb;font-family:Arial,sans-serif;color:white}
+canvas{display:block}
+#hud{position:fixed;top:15px;left:15px;right:15px;display:flex;justify-content:space-between;gap:10px;pointer-events:none}
+.panel{background:#101522d9;padding:12px 16px;border:1px solid #ffffff35;border-radius:14px}
+.label{font-size:11px;color:#b9c4d8;letter-spacing:2px}
+.value{font-size:24px;font-weight:bold;color:#ffd447;margin-top:4px}
+#controls{position:fixed;bottom:22px;left:0;right:0;display:flex;justify-content:space-between;align-items:end;padding:0 18px;gap:12px}
+.group{display:flex;gap:10px;align-items:center}
+.ctrl{width:65px;height:65px;border-radius:18px;border:1px solid #ffffff60;background:#111827c9;color:white;font-size:25px;font-weight:bold;touch-action:none;user-select:none}
+.ctrl:active,.ctrl.active{background:#e5ad20;color:#111}
+#gas{height:82px;width:76px;background:#d4a51d;color:#171717}
+#brake{height:65px;width:65px}
+#overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#080e1bc9;padding:20px;text-align:center}
+.dialog{max-width:430px;width:100%;padding:30px 24px;background:#111827ed;border:1px solid #f4c54280;border-radius:24px;box-shadow:0 20px 80px #0008}
+h1{font-size:clamp(32px,8vw,55px);margin:0;color:#ffd447;font-style:italic}
+.dialog p{line-height:1.6;color:#d5dbea}
+#start{padding:15px 30px;border:0;border-radius:12px;background:#ffd447;color:#151515;font-weight:bold;font-size:17px;cursor:pointer}
+.small{font-size:12px;color:#aab4c7}
+@media(min-width:800px){.ctrl{width:72px;height:72px}}
 </style>
 </head>
-
 <body>
-<main class="game">
-    <div class="symbol">🧠</div>
+<div id="hud">
+  <div class="panel"><div class="label">SPEED</div><div class="value"><span id="speed">0</span> KM/H</div></div>
+  <div class="panel"><div class="label">DISTANCE</div><div class="value"><span id="distance">0</span> m</div></div>
+  <div class="panel"><div class="label">SCORE</div><div class="value" id="score">0</div></div>
+</div>
 
-    <h1>Who Stole My Memory?</h1>
+<div id="controls">
+  <div class="group">
+    <button class="ctrl" id="left" aria-label="Steer left">◀</button>
+    <button class="ctrl" id="right" aria-label="Steer right">▶</button>
+  </div>
+  <div class="group">
+    <button class="ctrl" id="brake" aria-label="Brake">▼</button>
+    <button class="ctrl" id="gas" aria-label="Accelerate">▲</button>
+  </div>
+</div>
 
-    <p class="subtitle">
-        Every memory hides a secret.<br>
-        Every choice changes the truth.
-    </p>
+<div id="overlay">
+  <div class="dialog">
+    <h1>TURBO RUSH</h1>
+    <p>3D STREET RACING</p>
+    <p>Race through traffic, dodge obstacles and beat your high score!</p>
+    <button id="start">START RACE</button>
+    <p class="small">Use the on-screen buttons to steer, accelerate and brake.</p>
+  </div>
+</div>
 
-    <section id="intro">
-        <p class="story">
-            You wake up in a room you have never seen.
-
-            A strange message appears on the wall:
-
-            "If you discover the truth,
-            do not trust your final memory."
-
-            Someone knows who you are.
-
-            Someone does not want you to remember.
-        </p>
-
-        <button class="primary" onclick="startGame()">
-            Enter the Unknown
-        </button>
-    </section>
-
-    <section id="gameplay" class="hidden">
-        <h2 id="chapter">Chapter 1: The Strange Room</h2>
-
-        <p class="story" id="story"></p>
-
-        <div id="choices"></div>
-
-        <p class="memory" id="memory">
-            Memory fragments: 0
-        </p>
-    </section>
-
-    <section id="ending" class="hidden">
-        <h2 id="endingTitle">A New Memory</h2>
-        <p class="story" id="endingStory"></p>
-
-        <button onclick="restartGame()">Play Again</button>
-    </section>
-</main>
-
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
-let memories = 0;
-let decisions = [];
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87ceeb);
+scene.fog = new THREE.Fog(0x87ceeb, 35, 150);
 
-function startGame() {
-    document.getElementById("intro").classList.add("hidden");
-    document.getElementById("gameplay").classList.remove("hidden");
-    showRoom();
+const camera = new THREE.PerspectiveCamera(
+  65, innerWidth / innerHeight, 0.1, 250
+);
+camera.position.set(0, 5.5, 10);
+
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.prepend(renderer.domElement);
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x657080, 2));
+const sun = new THREE.DirectionalLight(0xffffff, 3);
+sun.position.set(-8, 15, 8);
+sun.castShadow = true;
+scene.add(sun);
+
+const mat = (color, roughness=0.7, metalness=0) =>
+  new THREE.MeshStandardMaterial({color, roughness, metalness});
+
+const grassMat = mat(0x43824c);
+const roadMat = mat(0x343943);
+const lineMat = mat(0xffffff);
+const goldMat = mat(0xffc629);
+const tireMat = mat(0x161719);
+const redMat = mat(0xc82032, 0.3, 0.35);
+const glassMat = mat(0x9dd8ed, 0.2, 0.25);
+
+function cube(parent, x,y,z, w,h,d, material) {
+  const mesh = new THREE.Mesh(
+    new THREE.BoxGeometry(w,h,d), material
+  );
+  mesh.position.set(x,y,z);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  parent.add(mesh);
+  return mesh;
 }
 
-function showRoom() {
-    document.getElementById("chapter").textContent =
-        "Chapter 1: The Strange Room";
+// Ground and road
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(300,300), grassMat
+);
+ground.rotation.x = -Math.PI/2;
+ground.position.y = -0.18;
+ground.receiveShadow = true;
+scene.add(ground);
 
-    document.getElementById("story").textContent =
-        "You discover three things: an old photograph, " +
-        "a locked door, and a phone showing a message from an unknown sender.\n\n" +
-        "The message says: 'You have forgotten me. Again.'\n\n" +
-        "What will you investigate first?";
+cube(scene, 0,-0.05,-60, 12,0.2,180, roadMat);
 
-    showChoices([
-        {
-            text: "📷 Examine the photograph",
-            action: examinePhoto
-        },
-        {
-            text: "🚪 Try the locked door",
-            action: examineDoor
-        },
-        {
-            text: "📱 Read the mysterious message",
-            action: examinePhone
-        }
-    ]);
+for (const x of [-6.1,6.1]) {
+  cube(scene,x,0.05,-60,0.18,0.25,180,lineMat);
+}
+const markings = [];
+for(let i=0;i<24;i++){
+  for(const x of [-2,2]){
+    const mark=cube(scene,x,0.075,-i*7,0.12,0.025,3.2,goldMat);
+    markings.push(mark);
+  }
 }
 
-function showChoices(options) {
-    const container = document.getElementById("choices");
-    container.innerHTML = "";
+// Build the player's 3D car
+const car = new THREE.Group();
+scene.add(car);
 
-    options.forEach(option => {
-        const button = document.createElement("button");
-        button.textContent = option.text;
-        button.onclick = option.action;
-        container.appendChild(button);
+cube(car,0,0.52,0,1.65,0.48,3.05,redMat);
+cube(car,0,0.88,-0.25,1.28,0.55,1.55,redMat);
+cube(car,0,1.05,-0.18,1.12,0.38,1.25,glassMat);
+cube(car,0,0.79,-1.48,1.9,0.12,0.25,tireMat);
+
+for(const x of [-0.84,0.84]){
+  for(const z of [-0.95,0.95]){
+    const wheel = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.34,0.34,0.22,20),
+      tireMat
+    );
+    wheel.rotation.z=Math.PI/2;
+    wheel.position.set(x,0.36,z);
+    wheel.castShadow=true;
+    car.add(wheel);
+  }
+}
+for(const x of [-0.52,0.52]){
+  cube(car,x,0.58,1.54,0.35,0.17,0.06,mat(0xff3434));
+}
+car.position.set(0,0,2);
+
+// Traffic cars and road obstacles
+const traffic = [];
+function makeTraffic(z){
+  const g = new THREE.Group();
+  const colors=[0x1764d4,0xf3f3f3,0x20242d,0xe0a128,0x24a58a];
+  const body=mat(colors[Math.floor(Math.random()*colors.length)],0.35,0.2);
+  cube(g,0,0.48,0,1.5,0.45,2.5,body);
+  cube(g,0,0.79,-0.2,1.12,0.4,1.2,glassMat);
+  for(const x of [-0.78,0.78]){
+    for(const zz of [-0.78,0.78]){
+      const wheel=new THREE.Mesh(
+        new THREE.CylinderGeometry(0.25,0.25,0.18,16),tireMat
+      );
+      wheel.rotation.z=Math.PI/2;
+      wheel.position.set(x,0.3,zz);
+      g.add(wheel);
+    }
+  }
+  g.position.set([-4,0,4][Math.floor(Math.random()*3)],0,z);
+  scene.add(g);
+  traffic.push(g);
+}
+for(let i=0;i<9;i++) makeTraffic(-20-i*17);
+
+// Trees along the roadside
+const trees=[];
+const trunkMat=mat(0x70503a);
+const leafMat=mat(0x237243);
+for(let i=0;i<36;i++){
+  for(const side of [-1,1]){
+    const g=new THREE.Group();
+    cube(g,0,0.8,0,0.28,1.6,0.28,trunkMat);
+    const crown=new THREE.Mesh(
+      new THREE.ConeGeometry(1.05,2.5,7),leafMat
+    );
+    crown.position.y=2.5;
+    crown.castShadow=true;
+    g.add(crown);
+    g.position.set(side*(9+Math.random()*5),0,-i*9-8);
+    scene.add(g);
+    trees.push(g);
+  }
+}
+
+let running=false, speed=0, distance=0, score=0;
+let steer=0, gas=false, brake=false, crashed=false;
+const speedEl=document.getElementById('speed');
+const distanceEl=document.getElementById('distance');
+const scoreEl=document.getElementById('score');
+const overlay=document.getElementById('overlay');
+
+function bindButton(id, down, up){
+  const el=document.getElementById(id);
+  el.addEventListener('pointerdown',e=>{
+    e.preventDefault(); down(); el.classList.add('active');
+  });
+  for(const event of ['pointerup','pointercancel','pointerleave']){
+    el.addEventListener(event,()=>{
+      up(); el.classList.remove('active');
     });
+  }
+}
+bindButton('left',()=>steer=-1,()=>{if(steer===-1)steer=0});
+bindButton('right',()=>steer=1,()=>{if(steer===1)steer=0});
+bindButton('gas',()=>gas=true,()=>gas=false);
+bindButton('brake',()=>brake=true,()=>brake=false);
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowLeft'||e.key==='a')steer=-1;
+  if(e.key==='ArrowRight'||e.key==='d')steer=1;
+  if(e.key==='ArrowUp'||e.key==='w')gas=true;
+  if(e.key==='ArrowDown'||e.key==='s')brake=true;
+});
+document.addEventListener('keyup',e=>{
+  if(['ArrowLeft','a','ArrowRight','d'].includes(e.key))steer=0;
+  if(['ArrowUp','w'].includes(e.key))gas=false;
+  if(['ArrowDown','s'].includes(e.key))brake=false;
+});
+
+function endRace(message){
+  running=false;
+  overlay.style.display='flex';
+  overlay.querySelector('h1').textContent=message;
+  overlay.querySelector('p').textContent='DISTANCE: '+Math.floor(distance)+' m  |  SCORE: '+score;
+  document.getElementById('start').textContent='RACE AGAIN';
 }
 
-function updateMemory() {
-    document.getElementById("memory").textContent =
-        "Memory fragments: " + memories;
-}
+document.getElementById('start').addEventListener('click',()=>{
+  speed=0; distance=0; score=0; crashed=false;
+  car.position.x=0;
+  traffic.forEach((t,i)=>{
+    t.position.z=-20-i*17;
+    t.position.x=[-4,0,4][Math.floor(Math.random()*3)];
+  });
+  overlay.style.display='none';
+  running=true;
+  gas=true;
+});
 
-function examinePhoto() {
-    memories++;
-    decisions.push("photo");
-    updateMemory();
+const clock=new THREE.Clock();
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=Math.min(clock.getDelta(),0.04);
 
-    showScene(
-        "The Forgotten Photograph",
-        "The photograph shows you standing beside a person " +
-        "whose face has been scratched out.\n\n" +
-        "On the back, someone wrote: 'Room 17. Before midnight.'\n\n" +
-        "You feel as if you have seen this person before.",
-        [
-            {
-                text: "Keep the photograph",
-                action: () => showRoom()
-            },
-            {
-                text: "Look for another clue",
-                action: examinePhone
-            }
-        ]
-    );
-}
+  if(running){
+    if(gas)speed=Math.min(speed+30*dt,190);
+    else speed=Math.max(speed-8*dt,55);
+    if(brake)speed=Math.max(0,speed-85*dt);
 
-function examineDoor() {
-    decisions.push("door");
+    car.position.x+=steer*speed*0.018*dt;
+    car.position.x=Math.max(-4.7,Math.min(4.7,car.position.x));
+    car.rotation.z=-steer*0.07;
+    distance+=speed*dt/3.6;
+    score=Math.floor(distance*2);
 
-    showScene(
-        "The Locked Door",
-        "The door has no handle, only a small screen.\n\n" +
-        "Three words appear: REMEMBER, FORGET, ESCAPE.\n\n" +
-        "A voice whispers: 'One of these will cost you everything.'",
-        [
-            {
-                text: "Choose REMEMBER",
-                action: () => chooseDoor("remember")
-            },
-            {
-                text: "Choose FORGET",
-                action: () => chooseDoor("forget")
-            },
-            {
-                text: "Step away",
-                action: showRoom
-            }
-        ]
-    );
-}
-
-function chooseDoor(choice) {
-    decisions.push(choice);
-
-    if (choice === "remember") {
-        memories++;
-        updateMemory();
-
-        showScene(
-            "A Fragment Returns",
-            "For one second, you remember a voice saying your name.\n\n" +
-            "Then the memory disappears.\n\n" +
-            "The screen displays: 'Memory recovered: 01.'",
-            [
-                {
-                    text: "Continue investigating",
-                    action: examinePhone
-                }
-            ]
-        );
-    } else {
-        showScene(
-            "The Silent Screen",
-            "The lights go out for a moment.\n\n" +
-            "When they return, the word FORGET has disappeared.\n\n" +
-            "Someone has already made this choice before you.",
-            [
-                {
-                    text: "Investigate the phone",
-                    action: examinePhone
-                }
-            ]
-        );
+    markings.forEach(m=>{
+      m.position.z+=speed*dt*0.65;
+      if(m.position.z>7)m.position.z-=168;
+    });
+    trees.forEach(t=>{
+      t.position.z+=speed*dt*0.65;
+      if(t.position.z>10)t.position.z-=324;
+    });
+    traffic.forEach(t=>{
+      t.position.z+=speed*dt*0.65;
+      if(t.position.z>8){
+        t.position.z=-140-Math.random()*40;
+        t.position.x=[-4,0,4][Math.floor(Math.random()*3)];
+      }
+      const dx=Math.abs(t.position.x-car.position.x);
+      const dz=Math.abs(t.position.z-car.position.z);
+      if(dx<1.35 && dz<1.65){
+        speed=0;
+        endRace('CRASH!');
+      }
+    });
+    if(Math.abs(car.position.x)>4.45){
+      speed=Math.max(45,speed-35*dt);
     }
+    speedEl.textContent=Math.round(speed);
+    distanceEl.textContent=Math.floor(distance);
+    scoreEl.textContent=score;
+  }
+
+  camera.position.x+=(car.position.x*0.45-camera.position.x)*0.06;
+  camera.lookAt(car.position.x*0.35,0.7,-7);
+  renderer.render(scene,camera);
 }
+animate();
 
-function examinePhone() {
-    memories++;
-    decisions.push("phone");
-    updateMemory();
-
-    showScene(
-        "A Message From Nowhere",
-        "The phone contains one final message:\n\n" +
-        "'Do not trust the person in the photograph.'\n\n" +
-        "But you have not told anyone about the photograph.\n\n" +
-        "How could the sender know?",
-        [
-            {
-                text: "Trust the message",
-                action: () => finishGame("message")
-            },
-            {
-                text: "Trust your own memories",
-                action: () => finishGame("memory")
-            }
-        ]
-    );
-}
-
-function showScene(title, story, options) {
-    document.getElementById("chapter").textContent = title;
-    document.getElementById("story").textContent = story;
-    showChoices(options);
-}
-
-function finishGame(choice) {
-    document.getElementById("gameplay").classList.add("hidden");
-    document.getElementById("ending").classList.remove("hidden");
-
-    if (choice === "message") {
-        document.getElementById("endingTitle").textContent =
-            "Ending: The Warning";
-
-        document.getElementById("endingStory").textContent =
-            "You decide to trust the mysterious sender.\n\n" +
-            "A final message appears:\n\n" +
-            "'Good. Now find out why you trusted me.'\n\n" +
-            "Is the sender trying to save you, or control you?";
-    } else {
-        document.getElementById("endingTitle").textContent =
-            "Ending: The Forgotten Truth";
-
-        document.getElementById("endingStory").textContent =
-            "You choose to trust your own memories.\n\n" +
-            "The photograph turns over by itself.\n\n" +
-            "On the back, new words appear:\n\n" +
-            "'You were the one who hid the truth.'";
-    }
-}
-
-function restartGame() {
-    memories = 0;
-    decisions = [];
-
-    updateMemory();
-
-    document.getElementById("ending").classList.add("hidden");
-    document.getElementById("gameplay").classList.add("hidden");
-    document.getElementById("intro").classList.remove("hidden");
-}
+addEventListener('resize',()=>{
+  camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
 </script>
 </body>
 </html>
