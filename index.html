@@ -1,0 +1,357 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Who Stole My Memory?</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    color: #f5efff;
+    background:
+        radial-gradient(ellipse at top, #38205e 0%, #100d20 55%, #070710 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+}
+
+.game {
+    width: 100%;
+    max-width: 700px;
+    padding: 40px 28px;
+    text-align: center;
+    border: 1px solid #7852a8;
+    border-radius: 24px;
+    background: rgba(17, 13, 34, 0.88);
+    box-shadow: 0 0 55px #8b45c544;
+}
+
+.symbol {
+    font-size: 64px;
+    margin-bottom: 18px;
+    animation: float 3s ease-in-out infinite;
+}
+
+h1 {
+    font-size: clamp(30px, 6vw, 48px);
+    color: #e1c4ff;
+    margin-bottom: 14px;
+}
+
+.subtitle {
+    color: #bba8d5;
+    line-height: 1.8;
+    margin-bottom: 28px;
+}
+
+.story {
+    font-size: 17px;
+    line-height: 2;
+    margin: 25px 0;
+    white-space: pre-line;
+}
+
+button {
+    width: 100%;
+    padding: 15px;
+    margin-top: 12px;
+    border: 1px solid #a77be0;
+    border-radius: 12px;
+    background: #382052;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+button:hover {
+    background: #7043a1;
+    transform: translateY(-2px);
+}
+
+.primary {
+    background: linear-gradient(120deg, #8150b8, #512d80);
+}
+
+.hidden {
+    display: none;
+}
+
+.memory {
+    margin-top: 24px;
+    color: #d6baff;
+    font-size: 14px;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+</style>
+</head>
+
+<body>
+<main class="game">
+    <div class="symbol">🧠</div>
+
+    <h1>Who Stole My Memory?</h1>
+
+    <p class="subtitle">
+        Every memory hides a secret.<br>
+        Every choice changes the truth.
+    </p>
+
+    <section id="intro">
+        <p class="story">
+            You wake up in a room you have never seen.
+
+            A strange message appears on the wall:
+
+            "If you discover the truth,
+            do not trust your final memory."
+
+            Someone knows who you are.
+
+            Someone does not want you to remember.
+        </p>
+
+        <button class="primary" onclick="startGame()">
+            Enter the Unknown
+        </button>
+    </section>
+
+    <section id="gameplay" class="hidden">
+        <h2 id="chapter">Chapter 1: The Strange Room</h2>
+
+        <p class="story" id="story"></p>
+
+        <div id="choices"></div>
+
+        <p class="memory" id="memory">
+            Memory fragments: 0
+        </p>
+    </section>
+
+    <section id="ending" class="hidden">
+        <h2 id="endingTitle">A New Memory</h2>
+        <p class="story" id="endingStory"></p>
+
+        <button onclick="restartGame()">Play Again</button>
+    </section>
+</main>
+
+<script>
+let memories = 0;
+let decisions = [];
+
+function startGame() {
+    document.getElementById("intro").classList.add("hidden");
+    document.getElementById("gameplay").classList.remove("hidden");
+    showRoom();
+}
+
+function showRoom() {
+    document.getElementById("chapter").textContent =
+        "Chapter 1: The Strange Room";
+
+    document.getElementById("story").textContent =
+        "You discover three things: an old photograph, " +
+        "a locked door, and a phone showing a message from an unknown sender.\n\n" +
+        "The message says: 'You have forgotten me. Again.'\n\n" +
+        "What will you investigate first?";
+
+    showChoices([
+        {
+            text: "📷 Examine the photograph",
+            action: examinePhoto
+        },
+        {
+            text: "🚪 Try the locked door",
+            action: examineDoor
+        },
+        {
+            text: "📱 Read the mysterious message",
+            action: examinePhone
+        }
+    ]);
+}
+
+function showChoices(options) {
+    const container = document.getElementById("choices");
+    container.innerHTML = "";
+
+    options.forEach(option => {
+        const button = document.createElement("button");
+        button.textContent = option.text;
+        button.onclick = option.action;
+        container.appendChild(button);
+    });
+}
+
+function updateMemory() {
+    document.getElementById("memory").textContent =
+        "Memory fragments: " + memories;
+}
+
+function examinePhoto() {
+    memories++;
+    decisions.push("photo");
+    updateMemory();
+
+    showScene(
+        "The Forgotten Photograph",
+        "The photograph shows you standing beside a person " +
+        "whose face has been scratched out.\n\n" +
+        "On the back, someone wrote: 'Room 17. Before midnight.'\n\n" +
+        "You feel as if you have seen this person before.",
+        [
+            {
+                text: "Keep the photograph",
+                action: () => showRoom()
+            },
+            {
+                text: "Look for another clue",
+                action: examinePhone
+            }
+        ]
+    );
+}
+
+function examineDoor() {
+    decisions.push("door");
+
+    showScene(
+        "The Locked Door",
+        "The door has no handle, only a small screen.\n\n" +
+        "Three words appear: REMEMBER, FORGET, ESCAPE.\n\n" +
+        "A voice whispers: 'One of these will cost you everything.'",
+        [
+            {
+                text: "Choose REMEMBER",
+                action: () => chooseDoor("remember")
+            },
+            {
+                text: "Choose FORGET",
+                action: () => chooseDoor("forget")
+            },
+            {
+                text: "Step away",
+                action: showRoom
+            }
+        ]
+    );
+}
+
+function chooseDoor(choice) {
+    decisions.push(choice);
+
+    if (choice === "remember") {
+        memories++;
+        updateMemory();
+
+        showScene(
+            "A Fragment Returns",
+            "For one second, you remember a voice saying your name.\n\n" +
+            "Then the memory disappears.\n\n" +
+            "The screen displays: 'Memory recovered: 01.'",
+            [
+                {
+                    text: "Continue investigating",
+                    action: examinePhone
+                }
+            ]
+        );
+    } else {
+        showScene(
+            "The Silent Screen",
+            "The lights go out for a moment.\n\n" +
+            "When they return, the word FORGET has disappeared.\n\n" +
+            "Someone has already made this choice before you.",
+            [
+                {
+                    text: "Investigate the phone",
+                    action: examinePhone
+                }
+            ]
+        );
+    }
+}
+
+function examinePhone() {
+    memories++;
+    decisions.push("phone");
+    updateMemory();
+
+    showScene(
+        "A Message From Nowhere",
+        "The phone contains one final message:\n\n" +
+        "'Do not trust the person in the photograph.'\n\n" +
+        "But you have not told anyone about the photograph.\n\n" +
+        "How could the sender know?",
+        [
+            {
+                text: "Trust the message",
+                action: () => finishGame("message")
+            },
+            {
+                text: "Trust your own memories",
+                action: () => finishGame("memory")
+            }
+        ]
+    );
+}
+
+function showScene(title, story, options) {
+    document.getElementById("chapter").textContent = title;
+    document.getElementById("story").textContent = story;
+    showChoices(options);
+}
+
+function finishGame(choice) {
+    document.getElementById("gameplay").classList.add("hidden");
+    document.getElementById("ending").classList.remove("hidden");
+
+    if (choice === "message") {
+        document.getElementById("endingTitle").textContent =
+            "Ending: The Warning";
+
+        document.getElementById("endingStory").textContent =
+            "You decide to trust the mysterious sender.\n\n" +
+            "A final message appears:\n\n" +
+            "'Good. Now find out why you trusted me.'\n\n" +
+            "Is the sender trying to save you, or control you?";
+    } else {
+        document.getElementById("endingTitle").textContent =
+            "Ending: The Forgotten Truth";
+
+        document.getElementById("endingStory").textContent =
+            "You choose to trust your own memories.\n\n" +
+            "The photograph turns over by itself.\n\n" +
+            "On the back, new words appear:\n\n" +
+            "'You were the one who hid the truth.'";
+    }
+}
+
+function restartGame() {
+    memories = 0;
+    decisions = [];
+
+    updateMemory();
+
+    document.getElementById("ending").classList.add("hidden");
+    document.getElementById("gameplay").classList.add("hidden");
+    document.getElementById("intro").classList.remove("hidden");
+}
+</script>
+</body>
+</html>
